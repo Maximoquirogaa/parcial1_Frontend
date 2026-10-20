@@ -1,0 +1,105 @@
+{
+  "version": 3,
+  "proyecto": "Parcial1_Frontend — Librería UTN (Programación III)",
+  "schema": "spec-driven",
+  "ultimoActualizado": "2026-10-20T21:25:00-03:00",
+  "comoContinuar": [
+    "1) Verificar raíz OpenSpec: openspec list --json (root debe tener path, no null)",
+    "2) Empezar por el propose de C-03: /opsx-propose (nombre: c-03-datos-catalogo-filtro)"
+  ],
+  "estadoActual": {
+    "changeActivo": null,
+    "fase": "sin-change-activo",
+    "siguienteAccion": "Proponer C-03 con /opsx-propose (nombre kebab: c-03-datos-catalogo-filtro). C-01 y C-02 están archivados; sus specs canónicas son openspec/specs/app-shell/spec.md y openspec/specs/visual-identity/spec.md.",
+    "bloqueos": [],
+    "ultimoSesion": "Sesión en la que se propuso, implementó (17/17 con verificación Playwright) y archivó C-02, creando la main spec visual-identity. C-01 ya estaba archivado."
+  },
+  "changes": [
+    {
+      "id": "C-01",
+      "nombre": "c-01-estructura-html-navegacion",
+      "ejercicio": 1,
+      "puntos": 15,
+      "estado": "archivado",
+      "artefactos": "4/4",
+      "tareas": "18/18",
+      "spec": "openspec/specs/app-shell/spec.md",
+      "archive": "openspec/changes/archive/2026-10-20-c-01-estructura-html-navegacion/"
+    },
+    {
+      "id": "C-02",
+      "nombre": "c-02-css-identidad-accesibilidad",
+      "ejercicio": 2,
+      "puntos": 20,
+      "estado": "archivado",
+      "artefactos": "4/4",
+      "tareas": "17/17",
+      "verificacion": "Playwright headless OK (320px/1280px sin scroll horizontal, foco outline 2px, error con ::before textual, 5/5 tablas con wrapper, paleta body=crema header=borgoña)",
+      "spec": "openspec/specs/visual-identity/spec.md",
+      "archive": "openspec/changes/archive/2026-10-20-c-02-css-identidad-accesibilidad/"
+    },
+    {
+      "id": "C-03",
+      "nombre": "c-03-datos-catalogo-filtro",
+      "ejercicio": 3,
+      "puntos": 15,
+      "estado": "pendiente",
+      "dependeDe": "C-01",
+      "bloqueadoPor": [],
+      "listoParaProponer": true
+    },
+    {
+      "id": "C-04",
+      "nombre": "c-04-altas-libros-clientes",
+      "ejercicio": 4,
+      "puntos": 15,
+      "estado": "pendiente",
+      "dependeDe": "C-03",
+      "listoParaProponer": false
+    },
+    {
+      "id": "C-05",
+      "nombre": "c-05-venta-historial",
+      "ejercicio": 5,
+      "puntos": 20,
+      "estado": "pendiente",
+      "dependeDe": "C-04",
+      "listoParaProponer": false
+    },
+    {
+      "id": "C-06",
+      "nombre": "c-06-persistencia-readme",
+      "ejercicio": 6,
+      "puntos": 10,
+      "estado": "pendiente",
+      "dependeDe": "C-05",
+      "listoParaProponer": false
+    }
+  ],
+  "archivosClave": {
+    "estado-proyecto.json": "este archivo (estado máquina para retomar el proyecto)",
+    "index.html": "shell con 5 vistas, tablas envueltas en .tabla-contenedor",
+    "css/styles.css": "identidad borgoña+crema, layout Flexbox+Grid mobile-first, componentes, accesibilidad (:focus-visible, mensajes con ::before textual)",
+    "js/navegacion.js": "cambio de vista por data-target, aria-current",
+    "CHANGES.md": "roadmap de 6 changes con dependencias y gates",
+    "openspec/": "config (schema spec-driven, es), specs/, changes/, changes/archive/",
+    "knowledge-base/": "KB canónica 01..10 (visión, actores, modelo, reglas RN-*, funcionalidades US-*, flujos, arquitectura, decisiones DD-*)",
+    "docs/consigna-primer-parcial.txt": "consigna extraída del PDF (fuente de verdad del examen)",
+    "docs/base-index.html": "HTML base con el que se inició el proyecto",
+    "docs/preferencias-usuario.md": "borgoña+crema, base HTML, artefactos en español"
+  },
+  "reglasDuras": [
+    "Solo HTML, CSS y JS nativos (sin frameworks, librerías, CDNs, npm, API, backend)",
+    "Persistencia simulada en navegador con localStorage (sin backend real)",
+    "Artefactos OpenSpec en español (headings estructurales y SHALL/MUST en inglés)",
+    "Paleta borgoña + crema (DD-01), CSS en archivo externo css/styles.css",
+    "Ejercicio 3 en adelante: datos en arrays/objetos con ids estables; render imperativo con textContent (no innerHTML con datos crudos)"
+  ],
+  "comandosUtiles": [
+    "openspec list --json",
+    "openspec status --change '<nombre>' --json",
+    "openspec instructions apply --change '<nombre>' --json",
+    "openspec validate '<nombre>' --type change",
+    "openspec archive '<nombre>'   (o /opsx-archive)"
+  ]
+}

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libreria UTN</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Libreria UTN</h1>
+        <nav>
+            <button type="button" data-target="vista-catalogo">Catálogo</button>
+            <button type="button" data-target="vista-libros">Libros</button>
+            <button type="button" data-target="vista-clientes">Clientes</button>
+            <button type="button" data-target="vista-ventas">Ventas</button>
+            <button type="button" data-target="vista-historial">Historial</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="vista-catalogo">
+            <h2>Catalogo de Libros</h2>
+            <form action="" method="GET">
+                <label for="buscar-titulo">Buscar por título:</label>
+                <input type="text" id="buscar-titulo" placeholder="Ej. Cien años de soledad">
+                <button type="submit">Buscar</button>
+            </form>
+
+            <p><strong>Estado:</strong> Mostrando catálogo completo.</p>
+
+            <div class="contenedor-catalogo">
+                <article>
+                    <h3>Cien años de soledad</h3>
+                    <p><strong>ISBN:</strong> 9780307474728</p>
+                    <p><strong>Editorial:</strong> Sudamericana</p>
+                    <p><strong>Género:</strong> Realismo Mágico</p>
+                    <p><strong>Autores:</strong> Gabriel García Márquez</p>
+                    <p><strong>Precio:</strong> $1500.00</p>
+                </article>
+
+                <article>
+                    <h3>Ficciones</h3>
+                    <p><strong>ISBN:</strong> 9789875666481</p>
+                    <p><strong>Editorial:</strong> Sur</p>
+                    <p><strong>Género:</strong> &lt;&lt;Sin clasificar&gt;&gt;</p>
+                    <p><strong>Autores:</strong> Jorge Luis Borges</p>
+                    <p><strong>Precio:</strong> $2000.00</p>
+                </article>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="vista-libros">
+            <h2>Gestión de Libros</h2>
+
+            <form action="" method="POST">
+                <fieldset>
+                    <legend>Alta de Nuevo Libro</legend>
+
+                    <p>
+                        <label for="libro-titulo">Título *:</label><br>
+                        <input type="text" id="libro-titulo" placeholder="Ej. El Aleph" required>
+                    </p>
+
+                    <p>
+                        <label for="libro-isbn">ISBN *:</label><br>
+                        <input type="text" id="libro-isbn" placeholder="Ej. 9789500428132" required>
+                    </p>
+
+                    <p>
+                        <label for="libro-precio">Precio *:</label><br>
+                        <input type="number" id="libro-precio" min="0.01" step="0.01" placeholder="0.00" required>
+                    </p>
+
+                    <p>
+                        <label for="libro-editorial">Editorial *:</label><br>
+                        <select id="libro-editorial" required>
+                            <option value="">Seleccione una editorial...</option>
+                            <option value="1">Sudamericana</option>
+                            <option value="2">Sur</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <label for="libro-genero">Género:</label><br>
+                        <select id="libro-genero">
+                            <option value="">«Sin clasificar»</option>
+                            <option value="1">Realismo Mágico</option>
+                            <option value="2">Ensayo</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <label for="libro-autores">Autores * (Mantener Ctrl para seleccionar varios):</label><br>
+                        <select id="libro-autores" multiple required>
+                            <option value="1">Gabriel García Márquez</option>
+                            <option value="2">Jorge Luis Borges</option>
+                            <option value="3">Julio Cortázar</option>
+                        </select>
+                    </p>
+
+                    <button type="submit">Guardar Libro</button>
+                </fieldset>
+            </form>
+
+            <h3>Libros Registrados</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>ISBN</th>
+                        <th>Editorial</th>
+                        <th>Género</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Cien años de soledad</td>
+                        <td>9780307474728</td>
+                        <td>Sudamericana</td>
+                        <td>Realismo Mágico</td>
+                        <td>$1500.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <section id="vista-clientes">
+            <h2>Gestión de Clientes</h2>
+
+            <form action="" method="POST">
+                <fieldset>
+                    <legend>Alta de Nuevo Cliente</legend>
+
+                    <p>
+                        <label for="cliente-nombre">Nombre Completo *:</label><br>
+                        <input type="text" id="cliente-nombre" placeholder="Ej. Juan Pérez" required>
+                    </p>
+
+                    <p>
+                        <label for="cliente-email">Email *:</label><br>
+                        <input type="email" id="cliente-email" placeholder="ejemplo@correo.com" required>
+                    </p>
+
+                    <button type="submit">Guardar Cliente</button>
+                </fieldset>
+            </form>
+
+            <h3>Clientes Registrados</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Juan Pérez</td>
+                        <td>juan.perez@example.com</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <section id="vista-ventas">
+            <h2>Registrar Venta</h2>
+
+            <form action="" method="POST">
+                <p>
+                    <label for="venta-cliente">Cliente *:</label><br>
+                    <select id="venta-cliente" required>
+                        <option value="">Seleccione un cliente...</option>
+                        <option value="1">Juan Pérez</option>
+                    </select>
+                </p>
+
+                <fieldset>
+                    <legend>Agregar Libro a la Venta</legend>
+
+                    <p>
+                        <label for="venta-libro">Libro:</label><br>
+                        <select id="venta-libro">
+                            <option value="">Seleccione un libro...</option>
+                            <option value="1">Cien años de soledad ($1500.00)</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <label for="venta-cantidad">Cantidad:</label><br>
+                        <input type="number" id="venta-cantidad" min="1" value="1">
+                    </p>
+
+                    <button type="button">Agregar Renglón</button>
+                </fieldset>
+
+                <h3>Resumen de la Venta</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Libro</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Cien años de soledad</td>
+                            <td>$1500.00</td>
+                            <td>2</td>
+                            <td>$3000.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>Total de la Venta:</strong> $3000.00</p>
+                <button type="submit">Confirmar Venta</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <section id="vista-historial">
+            <h2>Historial de Ventas</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Venta</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1001</td>
+                        <td>2026-10-14</td>
+                        <td>Juan Pérez</td>
+                        <td>$5000.00</td>
+                        <td><button type="button">Ver Detalle</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+
+
+    </main>
+
+
+    
+</body>
+</html>
