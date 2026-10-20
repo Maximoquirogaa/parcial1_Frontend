@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de gestión de librería - Parcial 1 de Programación III UTN. Catálogo, registro de libros, clientes, ventas e historial.">
+  <title>Librería Borgoña | Sistema de Gestión Editorial</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Enlace accesible de salto al contenido -->
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Encabezado general con identidad y navegación principal -->
+  <header class="main-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <span class="brand-badge" aria-hidden="true">❦</span>
+        <div class="brand-text">
+          <h1 class="brand-title">Librería UTN</h1>
+          <p class="brand-tagline">Catálogo clásico &amp; gestión editorial</p>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Navegación principal del sistema">
+        <ul class="nav-list" role="menubar">
+          <li role="none">
+            <button type="button" class="nav-link active" role="menuitem" data-view="catalogo" id="nav-btn-catalogo" aria-current="page">
+              Catálogo
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" class="nav-link" role="menuitem" data-view="libros" id="nav-btn-libros">
+              Libros
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" class="nav-link" role="menuitem" data-view="clientes" id="nav-btn-clientes">
+              Clientes
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" class="nav-link" role="menuitem" data-view="ventas" id="nav-btn-ventas">
+              Ventas
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" class="nav-link" role="menuitem" data-view="historial" id="nav-btn-historial">
+              Historial
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenedor de notificaciones globales en vivo -->
+  <div class="container notif-wrapper" aria-live="polite" aria-atomic="true">
+    <div id="global-alert" class="alert" hidden>
+      <span class="alert-icon" aria-hidden="true"></span>
+      <span id="global-alert-message" class="alert-message"></span>
+      <button type="button" class="alert-close" id="btn-close-alert" aria-label="Cerrar notificación">×</button>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <main id="main-content" class="main-content container">
+
+    <!-- ==========================================
+         VISTA 1: CATÁLOGO
+         ========================================== -->
+    <section id="view-catalogo" class="view-panel active" aria-labelledby="title-catalogo">
+      <header class="section-header">
+        <div>
+          <h2 id="title-catalogo" class="section-title">Catálogo de Libros</h2>
+          <p class="section-description">Explora nuestra colección editorial disponible.</p>
+        </div>
+      </header>
+
+      <!-- Barra de búsqueda por título -->
+      <search class="search-bar-container" role="search">
+        <form id="form-search" class="search-form" novalidate>
+          <div class="search-input-group">
+            <label for="search-input" class="search-label">Buscar libro por título:</label>
+            <div class="input-with-button">
+              <input 
+                type="search" 
+                id="search-input" 
+                name="searchTitle" 
+                class="form-control" 
+                placeholder="Ejemplo: Don Quijote..." 
+                autocomplete="off"
+              >
+              <button type="submit" class="btn btn-primary" id="btn-search">Buscar</button>
+              <button type="button" class="btn btn-secondary" id="btn-search-clear">Mostrar todos</button>
+            </div>
+          </div>
+        </form>
+      </search>
+
+      <!-- Mensaje informativo de filtro actual -->
+      <div id="search-status" class="search-status" aria-live="polite"></div>
+
+      <!-- Contenedor dinámico de tarjetas de libros -->
+      <div id="catalogo-list" class="cards-grid" aria-label="Resultados del catálogo"></div>
+
+      <!-- Mensaje cuando no hay resultados de búsqueda -->
+      <div id="catalogo-empty" class="empty-state" hidden>
+        <div class="empty-state-icon" aria-hidden="true">🔍</div>
+        <h3 class="empty-state-title">No se encontraron libros</h3>
+        <p class="empty-state-text">No hay obras que coincidan con el término buscado. Prueba con otro título o limpia el buscador.</p>
+        <button type="button" class="btn btn-secondary" id="btn-empty-reset">Restablecer catálogo</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 2: LIBROS (ALTA Y LISTADO)
+         ========================================== -->
+    <section id="view-libros" class="view-panel" aria-labelledby="title-libros" hidden>
+      <header class="section-header">
+        <div>
+          <h2 id="title-libros" class="section-title">Administración de Libros</h2>
+          <p class="section-description">Registra nuevas obras y consulta el inventario del sistema.</p>
+        </div>
+      </header>
+
+      <div class="layout-two-columns">
+        <!-- Formulario de alta de libros -->
+        <article class="card card-form">
+          <h3 class="card-title">Registrar nuevo libro</h3>
+          <p class="card-subtitle">Completa todos los campos obligatorios (*) para ingresar el libro al catálogo.</p>
+
+          <form id="form-libro" class="form-vertical" novalidate>
+            <div id="form-libro-feedback" class="form-feedback" role="alert" hidden></div>
+
+            <div class="form-group">
+              <label for="libro-titulo" class="form-label">Título <span class="required" aria-hidden="true">*</span>:</label>
+              <input type="text" id="libro-titulo" name="titulo" class="form-control" required placeholder="Nombre de la obra">
+              <span class="field-error" id="error-libro-titulo" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="libro-isbn" class="form-label">ISBN <span class="required" aria-hidden="true">*</span>:</label>
+              <input type="text" id="libro-isbn" name="isbn" class="form-control" required placeholder="Ej: 978-987-1234-56-7">
+              <span class="field-hint">Se valida unicidad ignorando guiones y espacios.</span>
+              <span class="field-error" id="error-libro-isbn" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="libro-precio" class="form-label">Precio ($) <span class="required" aria-hidden="true">*</span>:</label>
+              <input type="number" id="libro-precio" name="precio" class="form-control" min="0.01" step="0.01" required placeholder="0.00">
+              <span class="field-error" id="error-libro-precio" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="libro-editorial" class="form-label">Editorial <span class="required" aria-hidden="true">*</span>:</label>
+              <select id="libro-editorial" name="editorialId" class="form-control" required>
+                <option value="">-- Seleccionar editorial --</option>
+              </select>
+              <span class="field-error" id="error-libro-editorial" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="libro-genero" class="form-label">Género:</label>
+              <select id="libro-genero" name="generoId" class="form-control">
+                <option value="">«Sin clasificar»</option>
+              </select>
+              <span class="field-hint">Campo opcional. Si se omite, figurará como «Sin clasificar».</span>
+              <span class="field-error" id="error-libro-genero" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <fieldset class="fieldset-selection">
+                <legend class="form-label">Autores <span class="required" aria-hidden="true">*</span> (al menos uno):</legend>
+                <div id="libro-autores-container" class="checkbox-group" role="group" aria-describedby="hint-autores">
+                  <!-- Se generan dinámicamente los checkboxes accesibles de autores -->
+                </div>
+                <span id="hint-autores" class="field-hint">Marca una o más casillas de autores registrados.</span>
+                <span class="field-error" id="error-libro-autores" aria-live="polite"></span>
+              </fieldset>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit-libro">Guardar libro en catálogo</button>
+              <button type="reset" class="btn btn-secondary" id="btn-reset-libro">Limpiar formulario</button>
+            </div>
+          </form>
+        </article>
+
+        <!-- Listado de libros registrados -->
+        <article class="card card-table">
+          <div class="card-header-flex">
+            <h3 class="card-title">Inventario registrado</h3>
+            <span id="badge-total-libros" class="badge">0 libros</span>
+          </div>
+
+          <div class="table-responsive" tabindex="0" role="region" aria-label="Tabla de libros registrados">
+            <table class="data-table" id="tabla-libros">
+              <thead>
+                <tr>
+                  <th scope="col">Título</th>
+                  <th scope="col">ISBN</th>
+                  <th scope="col">Editorial</th>
+                  <th scope="col">Género</th>
+                  <th scope="col">Autor(es)</th>
+                  <th scope="col" class="text-right">Precio</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-libros-body">
+                <!-- Filas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="tabla-libros-empty" class="empty-state" hidden>
+            <p class="empty-state-text">No hay libros registrados en el sistema.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 3: CLIENTES (ALTA Y LISTADO)
+         ========================================== -->
+    <section id="view-clientes" class="view-panel" aria-labelledby="title-clientes" hidden>
+      <header class="section-header">
+        <div>
+          <h2 id="title-clientes" class="section-title">Administración de Clientes</h2>
+          <p class="section-description">Registra compradores para habilitarles la emisión de ventas.</p>
+        </div>
+      </header>
+
+      <div class="layout-two-columns">
+        <!-- Formulario de alta de clientes -->
+        <article class="card card-form">
+          <h3 class="card-title">Registrar nuevo cliente</h3>
+          <p class="card-subtitle">Ingresa el nombre completo y correo electrónico único.</p>
+
+          <form id="form-cliente" class="form-vertical" novalidate>
+            <div id="form-cliente-feedback" class="form-feedback" role="alert" hidden></div>
+
+            <div class="form-group">
+              <label for="cliente-nombre" class="form-label">Nombre completo <span class="required" aria-hidden="true">*</span>:</label>
+              <input type="text" id="cliente-nombre" name="nombre" class="form-control" required placeholder="Ej: María Victoria Albarracín">
+              <span class="field-error" id="error-cliente-nombre" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="cliente-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span>:</label>
+              <input type="email" id="cliente-email" name="email" class="form-control" required placeholder="cliente@ejemplo.com">
+              <span class="field-hint">Debe ser un email válido y no estar registrado previamente.</span>
+              <span class="field-error" id="error-cliente-email" aria-live="polite"></span>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit-cliente">Guardar cliente</button>
+              <button type="reset" class="btn btn-secondary" id="btn-reset-cliente">Limpiar formulario</button>
+            </div>
+          </form>
+        </article>
+
+        <!-- Listado de clientes registrados -->
+        <article class="card card-table">
+          <div class="card-header-flex">
+            <h3 class="card-title">Clientes registrados</h3>
+            <span id="badge-total-clientes" class="badge">0 clientes</span>
+          </div>
+
+          <div class="table-responsive" tabindex="0" role="region" aria-label="Tabla de clientes registrados">
+            <table class="data-table" id="tabla-clientes">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Nombre completo</th>
+                  <th scope="col">Correo electrónico</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-clientes-body">
+                <!-- Filas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="tabla-clientes-empty" class="empty-state" hidden>
+            <p class="empty-state-text">No hay clientes registrados en el sistema.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 4: VENTAS (EMISIÓN SIMULADA)
+         ========================================== -->
+    <section id="view-ventas" class="view-panel" aria-labelledby="title-ventas" hidden>
+      <header class="section-header">
+        <div>
+          <h2 id="title-ventas" class="section-title">Nueva Venta Simulada</h2>
+          <p class="section-description">Selecciona un cliente, añade libros con sus cantidades y confirma la operación.</p>
+        </div>
+      </header>
+
+      <div id="form-venta-feedback" class="form-feedback" role="alert" hidden></div>
+
+      <div class="layout-sale-grid">
+        <!-- Paso 1: Selección de cliente y agregado de renglones -->
+        <div class="sale-controls-col">
+          <!-- Tarjeta selección de cliente -->
+          <article class="card">
+            <h3 class="card-title">1. Cliente de la venta</h3>
+            <div class="form-group">
+              <label for="venta-cliente" class="form-label">Seleccionar cliente <span class="required" aria-hidden="true">*</span>:</label>
+              <select id="venta-cliente" class="form-control" required>
+                <option value="">-- Elige un cliente registrado --</option>
+              </select>
+              <span class="field-error" id="error-venta-cliente" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <!-- Tarjeta para agregar ítems -->
+          <article class="card">
+            <h3 class="card-title">2. Agregar renglón de libro</h3>
+            <form id="form-renglon" class="form-vertical" novalidate>
+              <div class="form-group">
+                <label for="venta-libro" class="form-label">Libro disponible <span class="required" aria-hidden="true">*</span>:</label>
+                <select id="venta-libro" class="form-control" required>
+                  <option value="">-- Seleccionar libro --</option>
+                </select>
+                <span class="field-hint" id="venta-libro-info">Elige un libro para visualizar su precio actual.</span>
+                <span class="field-error" id="error-venta-libro" aria-live="polite"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="venta-cantidad" class="form-label">Cantidad <span class="required" aria-hidden="true">*</span>:</label>
+                <input type="number" id="venta-cantidad" class="form-control" min="1" step="1" value="1" required>
+                <span class="field-hint">Número entero mayor que cero. Si el libro ya está en el detalle, se sumará.</span>
+                <span class="field-error" id="error-venta-cantidad" aria-live="polite"></span>
+              </div>
+
+              <button type="submit" class="btn btn-secondary w-100" id="btn-add-renglon">
+                + Agregar libro a la orden
+              </button>
+            </form>
+          </article>
+        </div>
+
+        <!-- Paso 2: Resumen y composición de renglones -->
+        <div class="sale-summary-col">
+          <article class="card">
+            <div class="card-header-flex">
+              <h3 class="card-title">3. Detalle de la orden en curso</h3>
+              <button type="button" class="btn btn-outline-danger btn-sm" id="btn-vaciar-carrito" title="Quitar todos los renglones">
+                Vaciar detalle
+              </button>
+            </div>
+
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Renglones de la venta actual">
+              <table class="data-table" id="tabla-venta-renglones">
+                <thead>
+                  <tr>
+                    <th scope="col">Libro</th>
+                    <th scope="col" class="text-center">Cant.</th>
+                    <th scope="col" class="text-right">Precio unitario</th>
+                    <th scope="col" class="text-right">Subtotal</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-venta-renglones-body">
+                  <!-- Renglones de venta dinámicos -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Estado vacío de la orden -->
+            <div id="venta-renglones-empty" class="empty-state">
+              <p class="empty-state-text">No has agregado libros a esta orden todavía.</p>
+            </div>
+
+            <!-- Resumen económico final -->
+            <div class="sale-totals-panel">
+              <div class="total-row">
+                <span class="total-label">Cantidad de ítems:</span>
+                <span id="resumen-total-items" class="total-value">0</span>
+              </div>
+              <div class="total-row total-highlight">
+                <span class="total-label">Total a liquidar:</span>
+                <span id="resumen-total-monto" class="total-value-grand">$0.00</span>
+              </div>
+
+              <div class="sale-confirm-actions">
+                <button type="button" class="btn btn-primary btn-lg w-100" id="btn-confirmar-venta">
+                  ✓ Confirmar y registrar venta
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5: HISTORIAL DE VENTAS
+         ========================================== -->
+    <section id="view-historial" class="view-panel" aria-labelledby="title-historial" hidden>
+      <header class="section-header">
+        <div>
+          <h2 id="title-historial" class="section-title">Historial de Ventas</h2>
+          <p class="section-description">Registro de operaciones confirmadas con valores históricos congelados.</p>
+        </div>
+      </header>
+
+      <div class="layout-history">
+        <!-- Tabla de ventas realizadas -->
+        <article class="card">
+          <div class="card-header-flex">
+            <h3 class="card-title">Ventas concretadas</h3>
+            <span id="badge-total-ventas" class="badge">0 ventas</span>
+          </div>
+
+          <div class="table-responsive" tabindex="0" role="region" aria-label="Listado de ventas históricas">
+            <table class="data-table" id="tabla-historial">
+              <thead>
+                <tr>
+                  <th scope="col">ID Venta</th>
+                  <th scope="col">Fecha y hora</th>
+                  <th scope="col">Cliente</th>
+                  <th scope="col" class="text-right">Total ($)</th>
+                  <th scope="col" class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-historial-body">
+                <!-- Filas de ventas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="historial-empty" class="empty-state" hidden>
+            <p class="empty-state-text">No se ha registrado ninguna venta en el sistema.</p>
+          </div>
+        </article>
+
+        <!-- Detalle de la venta seleccionada (inmutable) -->
+        <aside id="panel-detalle-venta" class="card card-detail" aria-labelledby="title-detalle-venta" hidden>
+          <div class="card-header-flex">
+            <h3 id="title-detalle-venta" class="card-title">Detalle de Venta</h3>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-cerrar-detalle" aria-label="Cerrar panel de detalle">
+              ✕ Cerrar
+            </button>
+          </div>
+
+          <div class="detail-metadata">
+            <p><strong>Comprobante ID:</strong> <span id="detalle-id">-</span></p>
+            <p><strong>Fecha:</strong> <span id="detalle-fecha">-</span></p>
+            <p><strong>Cliente:</strong> <span id="detalle-cliente">-</span></p>
+            <p><strong>Email cliente:</strong> <span id="detalle-email">-</span></p>
+          </div>
+
+          <div class="table-responsive" tabindex="0" role="region" aria-label="Renglones congelados de la venta">
+            <table class="data-table" id="tabla-detalle-renglones">
+              <thead>
+                <tr>
+                  <th scope="col">Libro</th>
+                  <th scope="col" class="text-center">Cant.</th>
+                  <th scope="col" class="text-right">Precio unitario histórico</th>
+                  <th scope="col" class="text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-detalle-renglones-body">
+                <!-- Renglones inmutables -->
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colspan="3" class="text-right">Total abonado:</th>
+                  <td id="detalle-total" class="text-right font-bold">$0.00</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <p class="note-immutable">
+            <span aria-hidden="true">ℹ</span>
+            <em>Los precios unitarios y subtotales corresponden al valor congelado en el momento de la confirmación de la venta.</em>
+          </p>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pie de página institucional -->
+  <footer class="main-footer">
+    <div class="container footer-content">
+      <div class="footer-info">
+        <p class="footer-title"><strong>Librería Borgoña</strong> | Sistema de Catálogo y Facturación Simulada</p>
+        <p class="footer-academic">Tecnicatura Universitaria en Programación — <strong>Programación III</strong> · Evaluación Parcial 1</p>
+      </div>
+      <div class="footer-notes">
+        <p class="footer-tech">Desarrollado con HTML5 semántico, CSS3 adaptable y JavaScript ECMAScript nativo. Sin dependencias externas.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts modulares nativos sin compiladores ni librerías -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/catalogo.js"></script>
+  <script src="js/libros.js"></script>
+  <script src="js/clientes.js"></script>
+  <script src="js/ventas.js"></script>
+  <script src="js/historial.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+
