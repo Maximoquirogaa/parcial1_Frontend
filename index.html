@@ -191,7 +191,7 @@
                         <input type="number" id="venta-cantidad" min="1" value="1">
                     </p>
 
-                    <button type="button">Agregar Renglón</button>
+                    <button type="button" id="agregar-renglon">Agregar Renglón</button>
                 </fieldset>
 
                 <h3>Resumen de la Venta</h3>
@@ -213,12 +213,12 @@
                 </table>
                 </div>
 
-                <p id="ventas-total"><strong>Total de la Venta:</strong> $0.00</p>
-                <button type="submit">Confirmar Venta</button>
+                <p id="ventas-total"><strong>Total de la Venta:</strong> <span id="ventas-total-valor">$0.00</span></p>
+                <button type="submit" id="confirmar-venta">Confirmar Venta</button>
             </form>
 
-            <p class="mensaje-exito" id="ventas-exito" hidden>Venta confirmada correctamente.</p>
-            <p class="mensaje-error" id="ventas-error" hidden>No se pudo confirmar la venta. Verifique cliente, renglones y cantidades.</p>
+            <p class="mensaje-exito" id="ventas-exito" role="status" aria-live="polite" hidden>Venta confirmada correctamente.</p>
+            <p class="mensaje-error" id="ventas-error" role="alert" aria-live="polite" hidden>No se pudo confirmar la venta. Verifique cliente, renglones y cantidades.</p>
         </section>
 
         <hr>

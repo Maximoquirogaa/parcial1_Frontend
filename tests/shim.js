@@ -231,7 +231,17 @@ function crearDocumentoMinimo() {
     elements['ventas-exito'].hidden = true;
     elements['ventas-error'] = nuevo('p');
     elements['ventas-error'].hidden = true;
-    elements['ventas-total'] = nuevo('p');
+    var totalVentas = nuevo('p');
+    totalVentas.id = 'ventas-total';
+    var etiquetaTotal = nuevo('strong');
+    etiquetaTotal.textContent = 'Total de la Venta: ';
+    totalVentas.appendChild(etiquetaTotal);
+    var valorTotal = nuevo('span');
+    valorTotal.id = 'ventas-total-valor';
+    valorTotal.textContent = '$0.00';
+    totalVentas.appendChild(valorTotal);
+    elements['ventas-total'] = totalVentas;
+    elements['ventas-total-valor'] = valorTotal;
     elements['historial-vacio'] = nuevo('p');
     elements['historial-vacio'].hidden = true;
     elements['ventas-vacio'] = nuevo('p');

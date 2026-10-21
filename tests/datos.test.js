@@ -173,3 +173,36 @@ test('3.1c - datos.js no duplica seed al reabrir (usa datos existentes de storag
     assert.deepStrictEqual(libreria.libros, librosExistentes, 'no se duplica el seed; se usan los datos existentes');
     assert.strictEqual(libreria.libros.length, 1, 'solo un libro, no seed + existentes');
 });
+
+test('3.2 - datos.js carga las ventas desde storage si existen', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/storage.js');
+    var storage = env.sandbox.window.storage;
+    var ventasGuardadas = [
+        {
+            id: 7,
+            fecha: '2026-10-21T10:00:00.000Z',
+            clienteId: 1,
+            clienteNombre: 'Juan Pérez',
+            renglones: [
+                { libroId: 1, libroTitulo: 'Cien años de soledad', precioUnitario: 12500, cantidad: 2, subtotal: 25000 }
+            ],
+            total: 25000
+        }
+    ];
+    storage.saveToStorage(storage.CLAVE_VENTAS, ventasGuardadas);
+
+    shim.cargarScript(env.context, 'js/datos.js');
+    var libreria = env.sandbox.window.libreria;
+
+    assert.deepStrictEqual(libreria.ventas, ventasGuardadas, 'ventas cargadas desde storage');
+});
+
+test('3.2b - datos.js inicializa ventas como arreglo vacío sin storage', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/datos.js');
+    var libreria = env.sandbox.window.libreria;
+
+    assert.ok(Array.isArray(libreria.ventas), 'libreria.ventas es un arreglo');
+    assert.strictEqual(libreria.ventas.length, 0, 'sin ventas guardadas arranca vacío');
+});

@@ -37,6 +37,7 @@
 
     var libros = librosSeed;
     var clientes = clientesSeed;
+    var ventas = [];
 
     if (window.storage && typeof window.storage.loadFromStorage === 'function') {
         var librosGuardados = window.storage.loadFromStorage(window.storage.CLAVE_LIBROS);
@@ -47,6 +48,10 @@
         if (clientesGuardados !== null) {
             clientes = clientesGuardados;
         }
+        var ventasGuardadas = window.storage.loadFromStorage(window.storage.CLAVE_VENTAS);
+        if (Array.isArray(ventasGuardadas)) {
+            ventas = ventasGuardadas;
+        }
     }
 
     ns.libreria = ns.libreria || {};
@@ -55,4 +60,5 @@
     ns.libreria.autores = autores;
     ns.libreria.libros = libros;
     ns.libreria.clientes = clientes;
+    ns.libreria.ventas = ventas;
 })();

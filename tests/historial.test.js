@@ -197,3 +197,38 @@ test('4.4b - detalle inmutable: no hay botones editar/eliminar en el historial',
         assert.strictEqual(botones[0].textContent, 'Ver Detalle');
     });
 });
+
+// --- 4.5: historial inicializado desde los datos existentes ---
+
+test('4.5 - historial.js renderiza las ventas existentes al cargar y ver detalle usa la venta vigente', function () {
+    var env = shim.crearSandbox();
+    var li;
+
+    shim.cargarScript(env.context, 'js/datos.js');
+    li = env.sandbox.window.libreria;
+    shim.cargarScript(env.context, 'js/ventas.js');
+    registrarVentaEn(env, ventaEjemplo());
+
+    shim.cargarScript(env.context, 'js/historial.js');
+
+    var doc = env.sandbox.document;
+    var tbody = doc.getElementById('tabla-historial');
+    assert.strictEqual(tbody.children.length, 1, 'la venta existente se muestra al inicializar');
+    assert.strictEqual(tbody.children[0].children[0].textContent, '1');
+    assert.strictEqual(tbody.children[0].children[2].textContent, 'Juan Pérez');
+
+    var vigente = env.sandbox.window.historial.obtenerVenta('1');
+    assert.ok(vigente, 'obtenerVenta normaliza el id recibido como texto');
+    vigente.total = 44444;
+    vigente.renglones = [
+        { libroId: 2, libroTitulo: 'El Aleph', precioUnitario: 9800, cantidad: 1, subtotal: 9800 }
+    ];
+
+    var fila = tbody.children[0];
+    var boton = fila.children[fila.children.length - 1].children[0];
+    boton.dispatchEvent({ type: 'click' });
+
+    var detalle = doc.getElementById('tabla-detalle-venta');
+    assert.strictEqual(detalle.children.length, 1, 'el detalle usa la venta vigente, no la copia del render');
+    assert.strictEqual(detalle.children[0].children[0].textContent, 'El Aleph');
+});

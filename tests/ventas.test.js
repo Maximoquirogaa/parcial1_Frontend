@@ -330,6 +330,23 @@ test('3.3b - quitar renglón inexistente no modifica el arreglo', function () {
     assert.strictEqual(renglones.length, 1);
 });
 
+test('3.3c - quitarRenglon elimina solo una coincidencia si el libro está repetido', function () {
+    var env = cargarVentas();
+    var quitarRenglon = env.sandbox.window.ventas.quitarRenglon;
+
+    var renglones = [
+        { libroId: 1, libroTitulo: 'A', precioUnitario: 1000, cantidad: 1, subtotal: 1000 },
+        { libroId: 1, libroTitulo: 'A', precioUnitario: 1000, cantidad: 1, subtotal: 1000 },
+        { libroId: 2, libroTitulo: 'B', precioUnitario: 1500, cantidad: 1, subtotal: 1500 }
+    ];
+    var resultado = quitarRenglon('1', renglones);
+
+    assert.strictEqual(resultado.valido, true);
+    assert.strictEqual(renglones.length, 2, 'solo se quita un renglón');
+    assert.strictEqual(renglones[0].libroId, 1);
+    assert.strictEqual(renglones[1].libroId, 2);
+});
+
 // --- 3.4 / 3.5 / 3.5b / 3.6: submit, validación y registro de venta ---
 
 test('3.4 - submit del formulario de ventas llama preventDefault', function () {
@@ -396,6 +413,21 @@ test('3.6 - venta válida registra exactamente una venta con id nuevo, fecha, cl
     assert.strictEqual(venta.total, 25000);
     assert.strictEqual(doc.getElementById('ventas-exito').hidden, false, 'mensaje de éxito visible');
     assert.strictEqual(doc.getElementById('ventas-error').hidden, true, 'error oculto');
+});
+
+test('3.6b - registrarVenta toma el nombre y el id del cliente desde libreria.clientes', function () {
+    var env = cargarVentas();
+    var window = env.sandbox.window;
+    var renglones = [
+        { libroId: 1, libroTitulo: 'Cien años de soledad', precioUnitario: 12500, cantidad: 1, subtotal: 12500 }
+    ];
+
+    var venta = window.ventas.registrarVenta('1', 'Nombre inventado', renglones);
+
+    assert.strictEqual(venta.clienteId, 1, 'el id del cliente se normaliza a número');
+    assert.strictEqual(venta.clienteNombre, 'Juan Pérez', 'el nombre sale de libreria.clientes');
+    assert.strictEqual(venta.renglones.length, 1);
+    assert.strictEqual(venta.total, 12500);
 });
 
 // --- 3.7 / 3.7b / 3.7c / 3.7d: refresco tras confirmar ---
@@ -473,6 +505,30 @@ test('3.7d - DD-06: precio unitario histórico se conserva aunque el catálogo c
     assert.strictEqual(venta.total, 12500, 'el total histórico no se altera');
 });
 
+test('3.7e - el botón Quitar de la tabla elimina el renglón y actualiza el total', function () {
+    var env = cargarVentasConDOM();
+    var doc = env.sandbox.document;
+    var tbody = doc.getElementById('tabla-renglones');
+
+    seleccionarOpcion(env, 'venta-cliente', '1');
+    seleccionarOpcion(env, 'venta-libro', '1');
+    establecerCantidad(env, 1);
+    hacerClique(env, 'agregar-renglon');
+
+    assert.strictEqual(tbody.children.length, 1, 'hay un renglón en la tabla');
+    var fila = tbody.children[0];
+    var celdaAccion = fila.children[fila.children.length - 1];
+    var boton = celdaAccion.children[0];
+    assert.ok(boton, 'el renglón tiene un botón Quitar');
+    assert.strictEqual(boton.textContent, 'Quitar');
+
+    boton.dispatchEvent({ type: 'click' });
+
+    assert.strictEqual(tbody.children.length, 0, 'el renglón se elimina');
+    assert.strictEqual(doc.getElementById('ventas-total-valor').textContent, '$0.00', 'el total vuelve a cero');
+    assert.strictEqual(doc.getElementById('ventas-vacio').hidden, false, 'se muestra el estado vacío');
+});
+
 // --- 5.1 / 5.1b: integración clásica en index.html ---
 
 test('5.1 - index.html carga storage.js, js/ventas.js y js/historial.js con defer en el orden correcto', function () {
@@ -503,6 +559,18 @@ test('5.1b - scripts de ventas y historial no usan type=module', function () {
     etiquetas.forEach(function (etiqueta) {
         assert.ok(!/type\s*=\s*["']module["']/.test(etiqueta), 'sin type="module" en ' + etiqueta);
     });
+});
+
+test('5.2 - index.html expone los ids y el ARIA que usa js/ventas.js', function () {
+    var html = fs.readFileSync('index.html', 'utf8');
+
+    assert.ok(/id="agregar-renglon"/.test(html), 'el botón Agregar Renglón tiene id');
+    assert.ok(/id="confirmar-venta"/.test(html), 'el botón Confirmar Venta tiene id');
+    assert.ok(/id="ventas-total-valor"/.test(html), 'el total tiene su propio nodo actualizable');
+    assert.ok(/id="ventas-error"[^>]*role="alert"/.test(html), '#ventas-error es un alert');
+    assert.ok(/id="ventas-exito"[^>]*role="status"/.test(html), '#ventas-exito es un status');
+    assert.ok(/id="ventas-error"[^>]*aria-live="polite"/.test(html), '#ventas-error anuncia cambios');
+    assert.ok(/id="ventas-exito"[^>]*aria-live="polite"/.test(html), '#ventas-exito anuncia cambios');
 });
 
 // --- 4.3: persistencia tras confirmación de venta (Change C-06) ---

@@ -2,6 +2,12 @@
     'use strict';
 
     var document = window.document;
+    var CAMPOS_VENTA = ['venta-cliente', 'venta-libro', 'venta-cantidad'];
+    var inicializado = false;
+
+    function redondear2(valor) {
+        return Math.round((Number(valor) + Number.EPSILON) * 100) / 100;
+    }
 
     function normalizarTexto(valor) {
         return String(valor === null || valor === undefined ? '' : valor).trim();
@@ -26,7 +32,7 @@
             return { valido: false, mensaje: 'El cliente seleccionado no es válido.' };
         }
 
-        var existe = clientes.some(function (cliente) { return cliente.id === numero; });
+        var existe = clientes.some(function (cliente) { return Number(cliente.id) === numero; });
         if (!existe) {
             return { valido: false, mensaje: 'El cliente seleccionado no existe.' };
         }
@@ -43,10 +49,10 @@
             return { valido: false, mensaje: 'La cantidad debe ser un número entero mayor que cero.' };
         }
 
-        var existente = renglonesLista.find(function (r) { return r.libroId === libroId; });
+        var existente = renglonesLista.find(function (r) { return Number(r.libroId) === Number(libroId); });
         if (existente) {
             existente.cantidad += cantidadNumero;
-            existente.subtotal = existente.cantidad * existente.precioUnitario;
+            existente.subtotal = redondear2(existente.cantidad * existente.precioUnitario);
             return { valido: true, mensaje: 'El libro ya estaba en la venta. Se sumó la cantidad al renglón existente.' };
         }
 
@@ -55,7 +61,7 @@
             libroTitulo: libroTitulo,
             precioUnitario: precio,
             cantidad: cantidadNumero,
-            subtotal: cantidadNumero * precio
+            subtotal: redondear2(cantidadNumero * precio)
         };
         renglonesLista.push(nuevoRenglon);
         return { valido: true, mensaje: 'Renglón agregado.' };
@@ -63,14 +69,13 @@
 
     function quitarRenglon(libroId, renglones) {
         var renglonesLista = renglones || [];
-        var encontrado = false;
-        for (var i = renglonesLista.length - 1; i >= 0; i--) {
-            if (renglonesLista[i].libroId === libroId) {
+        for (var i = 0; i < renglonesLista.length; i++) {
+            if (Number(renglonesLista[i].libroId) === Number(libroId)) {
                 renglonesLista.splice(i, 1);
-                encontrado = true;
+                return { valido: true, renglones: renglonesLista };
             }
         }
-        return { valido: encontrado, renglones: renglonesLista };
+        return { valido: false, renglones: renglonesLista };
     }
 
     function limpiarNodo(nodo) {
@@ -87,13 +92,15 @@
     }
 
     function calcularSubtotal(cantidad, precio) {
-        return Number(cantidad) * Number(precio);
+        return redondear2(Number(cantidad) * Number(precio));
     }
 
     function calcularTotal(renglones) {
         var total = 0;
-        (renglones || []).forEach(function (r) { total += Number(r.subtotal); });
-        return total;
+        (renglones || []).forEach(function (r) {
+            total += r.subtotal === undefined ? calcularSubtotal(r.cantidad, r.precioUnitario) : Number(r.subtotal);
+        });
+        return redondear2(total);
     }
 
     function formatoTotal(valor) {
@@ -101,10 +108,47 @@
     }
 
     function actualizarTotal(renglones) {
+        var nodoValor = document.getElementById('ventas-total-valor');
+        if (nodoValor) {
+            nodoValor.textContent = formatoTotal(calcularTotal(renglones));
+            return;
+        }
         var nodoTotal = document.getElementById('ventas-total');
         if (nodoTotal) {
             nodoTotal.textContent = 'Total de la Venta: ' + formatoTotal(calcularTotal(renglones));
         }
+    }
+
+    function ocultarMensajesVenta() {
+        var nodoError = document.getElementById('ventas-error');
+        var nodoExito = document.getElementById('ventas-exito');
+        if (nodoError) { nodoError.hidden = true; }
+        if (nodoExito) { nodoExito.hidden = true; }
+    }
+
+    function mostrarErrorVenta(mensaje) {
+        var nodoError = document.getElementById('ventas-error');
+        if (nodoError) {
+            nodoError.textContent = mensaje;
+            nodoError.hidden = false;
+        }
+    }
+
+    function mostrarExitoVenta(mensaje) {
+        var nodoExito = document.getElementById('ventas-exito');
+        if (nodoExito) {
+            nodoExito.textContent = mensaje;
+            nodoExito.hidden = false;
+        }
+    }
+
+    function limpiarAriaVenta() {
+        CAMPOS_VENTA.forEach(function (id) {
+            var campo = document.getElementById(id);
+            if (campo && campo.removeAttribute) {
+                campo.removeAttribute('aria-invalid');
+            }
+        });
     }
 
     function renderTablaRenglones(renglones) {
@@ -125,6 +169,10 @@
             botonQuitar.type = 'button';
             botonQuitar.textContent = 'Quitar';
             botonQuitar.setAttribute('data-libro-id', String(r.libroId));
+            botonQuitar.addEventListener('click', function () {
+                quitarRenglon(r.libroId, renglones);
+                renderTablaRenglones(renglones);
+            });
             celdaAccion.appendChild(botonQuitar);
             fila.appendChild(celdaAccion);
             tbody.appendChild(fila);
@@ -142,8 +190,9 @@
         var ventas = li.ventas = li.ventas || [];
         var maximo = 0;
         ventas.forEach(function (v) {
-            if (Number.isInteger(v.id) && v.id > maximo) {
-                maximo = v.id;
+            var id = Number(v.id);
+            if (Number.isInteger(id) && id > maximo) {
+                maximo = id;
             }
         });
         return maximo + 1;
@@ -151,35 +200,44 @@
 
     function validarVenta(idCliente, renglones) {
         var errores = [];
+        var campos = [];
         var clienteResultado = validarClienteSeleccionado(idCliente, window.libreria);
+
         if (!clienteResultado.valido) {
             errores.push(clienteResultado.mensaje);
+            campos.push('venta-cliente');
         }
         if (!(renglones && renglones.length > 0)) {
             errores.push('La venta debe tener al menos un renglón.');
+            campos.push('tabla-renglones');
         }
-        return { valido: errores.length === 0, errores: errores };
+
+        return { valido: errores.length === 0, errores: errores, campos: campos };
     }
 
     function registrarVenta(idCliente, nombreCliente, renglones) {
         var li = window.libreria;
         var ventas = li.ventas = li.ventas || [];
-        var id = siguienteIdVenta();
+        var idNumero = Number(idCliente);
+        var cliente = (li.clientes || []).find(function (c) { return Number(c.id) === idNumero; });
+        var renglonesVenta = (renglones || []).map(function (r) {
+            var cantidad = Number(r.cantidad);
+            var precio = Number(r.precioUnitario);
+            return {
+                libroId: Number(r.libroId),
+                libroTitulo: r.libroTitulo,
+                precioUnitario: precio,
+                cantidad: cantidad,
+                subtotal: redondear2(cantidad * precio)
+            };
+        });
         var venta = {
-            id: id,
+            id: siguienteIdVenta(),
             fecha: new Date().toISOString(),
-            clienteId: Number(idCliente),
-            clienteNombre: normalizarTexto(nombreCliente),
-            renglones: renglones.map(function (r) {
-                return {
-                    libroId: r.libroId,
-                    libroTitulo: r.libroTitulo,
-                    precioUnitario: r.precioUnitario,
-                    cantidad: r.cantidad,
-                    subtotal: r.subtotal
-                };
-            }),
-            total: calcularTotal(renglones)
+            clienteId: idNumero,
+            clienteNombre: cliente ? cliente.nombreCompleto : normalizarTexto(nombreCliente),
+            renglones: renglonesVenta,
+            total: calcularTotal(renglonesVenta)
         };
         ventas.push(venta);
         return venta;
@@ -194,6 +252,7 @@
         if (inputCantidad) {
             inputCantidad.value = '1';
         }
+        limpiarAriaVenta();
         actualizarTotal([]);
     }
 
@@ -203,11 +262,8 @@
         var li = window.libreria;
         var selectLibro = document.getElementById('venta-libro');
         var inputCantidad = document.getElementById('venta-cantidad');
-        var nodoError = document.getElementById('ventas-error');
-        var nodoExito = document.getElementById('ventas-exito');
 
-        if (nodoError) { nodoError.hidden = true; }
-        if (nodoExito) { nodoExito.hidden = true; }
+        ocultarMensajesVenta();
 
         if (!selectLibro || !inputCantidad) {
             return;
@@ -215,29 +271,28 @@
 
         var libroId = Number(selectLibro.value);
         if (!libroId) {
-            if (nodoError) {
-                nodoError.textContent = 'Seleccione un libro.';
-                nodoError.hidden = false;
-            }
+            mostrarErrorVenta('Seleccione un libro.');
             return;
         }
 
-        var libro = (li.libros || []).find(function (l) { return l.id === libroId; });
+        var libro = (li.libros || []).find(function (l) { return Number(l.id) === libroId; });
         if (!libro) {
+            mostrarErrorVenta('El libro seleccionado no existe.');
             return;
         }
 
         var resultado = agregarRenglon(libro.id, libro.titulo, libro.precio, inputCantidad.value, renglonesVenta);
         if (!resultado.valido) {
-            if (nodoError) {
-                nodoError.textContent = resultado.mensaje;
-                nodoError.hidden = false;
-            }
+            mostrarErrorVenta(resultado.mensaje);
             return;
         }
 
         renderTablaRenglones(renglonesVenta);
         inputCantidad.value = '1';
+
+        if (resultado.mensaje.indexOf('ya estaba') === 0) {
+            mostrarExitoVenta(resultado.mensaje);
+        }
     }
 
     function manejarSubmitVenta(event) {
@@ -257,18 +312,18 @@
             }
         }
 
-        var nodoError = document.getElementById('ventas-error');
-        var nodoExito = document.getElementById('ventas-exito');
-
-        if (nodoError) { nodoError.hidden = true; }
-        if (nodoExito) { nodoExito.hidden = true; }
+        ocultarMensajesVenta();
+        limpiarAriaVenta();
 
         var resultado = validarVenta(idCliente, renglonesVenta);
         if (!resultado.valido) {
-            if (nodoError) {
-                nodoError.textContent = resultado.errores.join(' ');
-                nodoError.hidden = false;
-            }
+            resultado.campos.forEach(function (id) {
+                var campo = document.getElementById(id);
+                if (campo && campo.setAttribute) {
+                    campo.setAttribute('aria-invalid', 'true');
+                }
+            });
+            mostrarErrorVenta(resultado.errores.join(' '));
             return;
         }
 
@@ -286,14 +341,18 @@
             window.historial.renderTablaHistorial(li.ventas);
         }
 
-        if (nodoExito) { nodoExito.hidden = false; }
+        mostrarExitoVenta('Venta confirmada correctamente.');
     }
 
     function inicializar() {
+        if (inicializado) {
+            return;
+        }
         var li = window.libreria;
         if (!li) {
             return;
         }
+        inicializado = true;
 
         if (window.clientes && typeof window.clientes.poblarSelectorVentaClientes === 'function') {
             window.clientes.poblarSelectorVentaClientes(li);
@@ -316,6 +375,8 @@
     }
 
     window.ventas = window.ventas || {};
+    window.ventas.CAMPOS_VENTA = CAMPOS_VENTA;
+    window.ventas.redondear2 = redondear2;
     window.ventas.validarCantidad = validarCantidad;
     window.ventas.validarClienteSeleccionado = validarClienteSeleccionado;
     window.ventas.agregarRenglon = agregarRenglon;

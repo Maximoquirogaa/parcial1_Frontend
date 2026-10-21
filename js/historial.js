@@ -2,6 +2,7 @@
     'use strict';
 
     var document = window.document;
+    var inicializado = false;
 
     function limpiarNodo(nodo) {
         while (nodo.firstChild) {
@@ -46,7 +47,7 @@
             botonDetalle.textContent = 'Ver Detalle';
             botonDetalle.setAttribute('data-venta-id', String(venta.id));
             botonDetalle.addEventListener('click', function () {
-                renderDetalleVenta(venta);
+                renderDetalleVenta(obtenerVenta(venta.id) || venta);
             });
             celdaAccion.appendChild(botonDetalle);
             fila.appendChild(celdaAccion);
@@ -81,8 +82,23 @@
         }
     }
 
+    function inicializar() {
+        if (inicializado) {
+            return;
+        }
+        var li = window.libreria;
+        if (!li) {
+            return;
+        }
+        inicializado = true;
+        renderTablaHistorial(li.ventas || []);
+    }
+
     window.historial = window.historial || {};
     window.historial.renderTablaHistorial = renderTablaHistorial;
     window.historial.obtenerVenta = obtenerVenta;
     window.historial.renderDetalleVenta = renderDetalleVenta;
+    window.historial.inicializar = inicializar;
+
+    inicializar();
 })();
