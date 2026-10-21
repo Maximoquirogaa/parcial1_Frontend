@@ -1,7 +1,11 @@
 # Librería UTN — Parcial 1 Frontend
 
 ## Autores
+## Maximo Quiroga, Santino Barone, Franco Rios y Fabrizio Simón
 
+## Aclaración
+Por un error en el git push en el que se uso force, se borraron los anteriores commits por lo que se reemplazo todo. Asi que subimos los commits de c-01 y c-02 en la rama "recuperado".
+## Resumen
 Proyecto desarrollado para la cátedra de Programación I — Facultad Regional Universidad Tecnológica Nacional (UTN).
 Entrega del Parcial 1 Frontend: aplicación de gestión de librería con catálogo, altas de libros y clientes, ventas simuladas, historial y persistencia en `localStorage`.
 
