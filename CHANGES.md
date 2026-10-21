@@ -125,7 +125,7 @@ GATE 4: C-05 ✓
 ## FASE 3 — Altas
 
 ### [C-04] `altas-libros-clientes`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - `js/libros.js`: formulario de alta con selectores generados desde datos locales (editorial, género con «Sin clasificar», autores múltiple).
   - Validaciones libro (RN-LIB-01…08): título/ISBN no vacíos, ISBN único (sin espacios/guiones), precio > 0, editorial/autores existentes, ≥1 autor, género opcional válido.
