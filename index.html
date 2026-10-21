@@ -8,6 +8,8 @@
     <script src="js/navegacion.js" defer></script>
     <script src="js/datos.js" defer></script>
     <script src="js/catalogo.js" defer></script>
+    <script src="js/libros.js" defer></script>
+    <script src="js/clientes.js" defer></script>
 </head>
 <body>
     <header>
@@ -43,7 +45,7 @@
         <section id="vista-libros" class="vista" aria-labelledby="titulo-libros" hidden>
             <h2 id="titulo-libros">Gestión de Libros</h2>
 
-            <form action="" method="POST">
+            <form action="" method="POST" novalidate>
                 <fieldset>
                     <legend>Alta de Nuevo Libro</legend>
 
@@ -90,7 +92,7 @@
             </form>
 
             <p class="mensaje-exito" id="libros-exito" hidden>Libro registrado correctamente.</p>
-            <p class="mensaje-error" id="libros-error" hidden>No se pudo registrar el libro. Revise los datos ingresados.</p>
+            <p class="mensaje-error" id="libros-error" role="alert" aria-live="polite" hidden>No se pudo registrar el libro. Revise los datos ingresados.</p>
 
             <h3>Libros Registrados</h3>
             <p class="mensaje-vacio" id="libros-vacio" hidden>No hay libros registrados.</p>
@@ -117,7 +119,7 @@
         <section id="vista-clientes" class="vista" aria-labelledby="titulo-clientes" hidden>
             <h2 id="titulo-clientes">Gestión de Clientes</h2>
 
-            <form action="" method="POST">
+            <form action="" method="POST" novalidate>
                 <fieldset>
                     <legend>Alta de Nuevo Cliente</legend>
 
@@ -136,7 +138,7 @@
             </form>
 
             <p class="mensaje-exito" id="clientes-exito" hidden>Cliente registrado correctamente.</p>
-            <p class="mensaje-error" id="clientes-error" hidden>No se pudo registrar el cliente. Revise los datos ingresados.</p>
+            <p class="mensaje-error" id="clientes-error" role="alert" aria-live="polite" hidden>No se pudo registrar el cliente. Revise los datos ingresados.</p>
 
             <h3>Clientes Registrados</h3>
             <p class="mensaje-vacio" id="clientes-vacio" hidden>No hay clientes registrados.</p>

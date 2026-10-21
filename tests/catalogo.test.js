@@ -180,3 +180,30 @@ test('3.4 - búsqueda vacía/texto sin contenido: muestra #catalogo-estado "cat�
     assert.ok(estado.textContent.indexOf('catálogo completo') !== -1, 'estado indica catálogo completo');
     assert.strictEqual(sinResultados.hidden, true, '#catalogo-sin-resultados oculto');
 });
+
+test('3.8 - TRIANGULATE: refrescar() re-renderiza conservando el filtro activo', function () {
+    var env = cargarCatalogoConDatos();
+    var window = env.sandbox.window;
+    var doc = env.sandbox.document;
+    var input = doc.getElementById('buscar-titulo');
+    var contenedor = doc._elements['contenedor-catalogo'];
+
+    input.value = 'aleph';
+    doc._form.dispatchEvent({ type: 'submit', preventDefault: function () {} });
+    assert.strictEqual(contenedor.children.length, 1, 'filtro "aleph" deja un libro');
+
+    window.libreria.libros.push({
+        id: 99,
+        titulo: 'Aleph nuevo',
+        isbn: 'REF-001',
+        precio: 100,
+        editorialId: 1,
+        generoId: null,
+        autoresIds: [1]
+    });
+    window.catalogo.refrescar();
+
+    assert.strictEqual(input.value, 'aleph', 'conserva el texto de búsqueda');
+    assert.strictEqual(contenedor.children.length, 2, 'refresca aplicando el mismo filtro');
+    assert.ok(contenedor.children.length < window.libreria.libros.length, 'no renderiza el catálogo completo');
+});

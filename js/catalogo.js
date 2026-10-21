@@ -90,6 +90,12 @@
         }
     }
 
+    function refrescar() {
+        var input = document.getElementById('buscar-titulo');
+        var texto = input ? input.value : '';
+        renderCatalogo(filtrarLibros(texto), texto);
+    }
+
     function inicializar() {
         renderCatalogo(libreria.libros);
 
@@ -107,4 +113,5 @@
     window.catalogo = window.catalogo || {};
     window.catalogo.filtrarLibros = filtrarLibros;
     window.catalogo.renderCatalogo = renderCatalogo;
+    window.catalogo.refrescar = refrescar;
 })();
