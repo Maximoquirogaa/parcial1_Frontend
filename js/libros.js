@@ -340,6 +340,10 @@
 
         li.libros.push(libro);
 
+        if (window.storage && typeof window.storage.saveToStorage === 'function') {
+            window.storage.saveToStorage(window.storage.CLAVE_LIBROS, li.libros);
+        }
+
         renderTablaLibros(li);
         poblarSelectores(li);
         poblarSelectorVentaLibros(li);

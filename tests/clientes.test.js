@@ -330,3 +330,23 @@ test('4.10c - nombre con caracteres HTML se inserta como texto literal', functio
     assert.strictEqual(opcion.textContent, nombre);
     assert.strictEqual(opcion.innerHTML, '');
 });
+
+// --- 4.2: persistencia tras alta de cliente (Change C-06) ---
+
+test('4.2 - clientes.js guarda en storage tras alta de cliente', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/datos.js');
+    shim.cargarScript(env.context, 'js/storage.js');
+    shim.cargarScript(env.context, 'js/clientes.js');
+    var storage = env.sandbox.window.storage;
+    var libreria = env.sandbox.window.libreria;
+    var cantidadInicial = libreria.clientes.length;
+
+    completarFormulario(env, clienteValido({ nombreCompleto: 'Cliente Persistido', email: 'persistido@mail.com' }));
+    enviarCliente(env);
+
+    var guardados = storage.loadFromStorage(storage.CLAVE_CLIENTES);
+    assert.strictEqual(guardados.length, cantidadInicial + 1, 'el cliente se guardó en storage');
+    assert.strictEqual(guardados[guardados.length - 1].nombreCompleto, 'Cliente Persistido');
+    assert.strictEqual(guardados[guardados.length - 1].email, 'persistido@mail.com');
+});

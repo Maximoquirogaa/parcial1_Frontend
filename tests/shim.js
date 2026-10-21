@@ -149,6 +149,7 @@ function crearDocumentoMinimo() {
             if (selector === '#vista-catalogo form' || selector === 'form') { return elements._form; }
             if (selector === '#vista-libros form') { return elements._formLibros; }
             if (selector === '#vista-clientes form') { return elements._formClientes; }
+            if (selector === '#vista-ventas form') { return elements._formVentas; }
             if (selector.indexOf('#') === 0) {
                 var id = selector.slice(1);
                 return elements[id] || (elements[id] = nuevo('div'));
@@ -212,17 +213,56 @@ function crearDocumentoMinimo() {
     elements['clientes-vacio'].hidden = true;
     elements['tabla-clientes'] = nuevo('tbody');
 
-    // Selectores de venta (C-04/C-05)
-    elements['venta-libro'] = nuevo('select');
-    elements['venta-cliente'] = nuevo('select');
+    // Selectores de venta y formulario de ventas (C-04/C-05)
+    var formVentas = nuevo('form');
+    campo(formVentas, 'select', 'venta-cliente', {});
+    campo(formVentas, 'select', 'venta-libro', {});
+    campo(formVentas, 'input', 'venta-cantidad', { type: 'number', value: '1' });
+    campo(formVentas, 'button', 'agregar-renglon', { type: 'button' });
+    campo(formVentas, 'button', 'confirmar-venta', { type: 'submit' });
+    elements._formVentas = formVentas;
+
+    elements['tabla-renglones'] = nuevo('tbody');
+    elements['tabla-historial'] = nuevo('tbody');
+    elements['historial-detalle'] = nuevo('div');
+    elements['historial-detalle'].hidden = true;
+    elements['tabla-detalle-venta'] = nuevo('tbody');
+    elements['ventas-exito'] = nuevo('p');
+    elements['ventas-exito'].hidden = true;
+    elements['ventas-error'] = nuevo('p');
+    elements['ventas-error'].hidden = true;
+    elements['ventas-total'] = nuevo('p');
+    elements['historial-vacio'] = nuevo('p');
+    elements['historial-vacio'].hidden = true;
+    elements['ventas-vacio'] = nuevo('p');
+    elements['ventas-vacio'].hidden = true;
 
     return doc;
+}
+
+function crearLocalStorageShim() {
+    var almacenamiento = {};
+    return {
+        getItem: function (clave) {
+            return almacenamiento[clave] === undefined ? null : almacenamiento[clave];
+        },
+        setItem: function (clave, valor) {
+            almacenamiento[clave] = String(valor);
+        },
+        removeItem: function (clave) {
+            delete almacenamiento[clave];
+        },
+        clear: function () {
+            almacenamiento = {};
+        }
+    };
 }
 
 function crearSandbox() {
     var sandbox = Object.create(globalThis);
     sandbox.window = sandbox;
     sandbox.document = crearDocumentoMinimo();
+    sandbox.localStorage = crearLocalStorageShim();
     var context = vm.createContext(sandbox);
     return { sandbox: sandbox, context: context };
 }

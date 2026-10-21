@@ -124,3 +124,52 @@ test('1.4 - espacio de nombres global window.libreria expone los 5 arrays', func
     assert.ok(Array.isArray(ns.libros), 'libros expuesto');
     assert.ok(Array.isArray(ns.clientes), 'clientes expuesto');
 });
+
+// --- 3.1 / 3.1b / 3.1c: integración con storage (Change C-06) ---
+
+test('3.1 - datos.js carga libros y clientes desde storage si existen', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/storage.js');
+    var storage = env.sandbox.window.storage;
+    var librosGuardados = [
+        { id: 1, titulo: 'Libro Guardado', isbn: 'GUARD-1', precio: 5000, editorialId: 1, generoId: null, autoresIds: [1] }
+    ];
+    var clientesGuardados = [
+        { id: 1, nombreCompleto: 'Cliente Guardado', email: 'guardado@mail.com' }
+    ];
+    storage.saveToStorage(storage.CLAVE_LIBROS, librosGuardados);
+    storage.saveToStorage(storage.CLAVE_CLIENTES, clientesGuardados);
+
+    shim.cargarScript(env.context, 'js/datos.js');
+    var libreria = env.sandbox.window.libreria;
+
+    assert.deepStrictEqual(libreria.libros, librosGuardados, 'libros cargados desde storage');
+    assert.deepStrictEqual(libreria.clientes, clientesGuardados, 'clientes cargados desde storage');
+});
+
+test('3.1b - datos.js usa seed como fallback si storage está vacío', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/storage.js');
+    shim.cargarScript(env.context, 'js/datos.js');
+    var libreria = env.sandbox.window.libreria;
+
+    assert.ok(Array.isArray(libreria.libros) && libreria.libros.length >= 6, 'seed de libros usado como fallback');
+    assert.strictEqual(libreria.clientes.length, 3, 'seed de clientes usado como fallback');
+    assert.strictEqual(libreria.libros[0].titulo, 'Cien años de soledad', 'primer libro del seed');
+});
+
+test('3.1c - datos.js no duplica seed al reabrir (usa datos existentes de storage)', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/storage.js');
+    var storage = env.sandbox.window.storage;
+    var librosExistentes = [
+        { id: 99, titulo: 'Ya Existente', isbn: 'EXIST-99', precio: 7777, editorialId: 1, generoId: null, autoresIds: [1] }
+    ];
+    storage.saveToStorage(storage.CLAVE_LIBROS, librosExistentes);
+
+    shim.cargarScript(env.context, 'js/datos.js');
+    var libreria = env.sandbox.window.libreria;
+
+    assert.deepStrictEqual(libreria.libros, librosExistentes, 'no se duplica el seed; se usan los datos existentes');
+    assert.strictEqual(libreria.libros.length, 1, 'solo un libro, no seed + existentes');
+});

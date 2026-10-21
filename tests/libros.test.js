@@ -648,18 +648,20 @@ test('3.7c - TRIANGULATE: el alta válida no recarga la página (preventDefault)
 
 // --- 5.1 / 5.2: integración clásica en index.html ---
 
-test('5.1 - index.html carga libros.js y clientes.js con defer después de datos y catálogo', function () {
+test('5.1 - index.html carga storage.js, datos.js, libros.js y clientes.js con defer en el orden correcto', function () {
     var html = fs.readFileSync('index.html', 'utf8');
+    var storage = html.indexOf('src="js/storage.js"');
     var datos = html.indexOf('src="js/datos.js"');
     var catalogo = html.indexOf('src="js/catalogo.js"');
     var libros = html.indexOf('src="js/libros.js"');
     var clientes = html.indexOf('src="js/clientes.js"');
 
-    assert.ok(datos >= 0 && catalogo >= 0, 'datos y catálogo deben estar referenciados');
+    assert.ok(storage >= 0 && datos >= 0 && catalogo >= 0, 'storage, datos y catálogo deben estar referenciados');
     assert.ok(libros >= 0, 'index.html debe cargar js/libros.js');
     assert.ok(clientes >= 0, 'index.html debe cargar js/clientes.js');
-    assert.ok(datos < catalogo && catalogo < libros && libros < clientes, 'orden datos → catálogo → libros → clientes');
+    assert.ok(storage < datos && datos < catalogo && catalogo < libros && libros < clientes, 'orden storage → datos → catálogo → libros → clientes');
 
+    assert.ok(/<script src="js\/storage\.js" defer><\/script>/.test(html), 'storage.js con defer');
     assert.ok(/<script src="js\/libros\.js" defer><\/script>/.test(html), 'libros.js con defer');
     assert.ok(/<script src="js\/clientes\.js" defer><\/script>/.test(html), 'clientes.js con defer');
 });
@@ -684,4 +686,24 @@ test('5.1c - TRIANGULATE: nodos de error con role=alert y aria-live=polite', fun
         assert.ok(/role="alert"/.test(etiqueta[0]), '# ' + id + ' con role=alert');
         assert.ok(/aria-live="polite"/.test(etiqueta[0]), '# ' + id + ' con aria-live=polite');
     });
+});
+
+// --- 4.1: persistencia tras alta de libro (Change C-06) ---
+
+test('4.1 - libros.js guarda en storage tras alta de libro', function () {
+    var env = shim.crearSandbox();
+    shim.cargarScript(env.context, 'js/datos.js');
+    shim.cargarScript(env.context, 'js/storage.js');
+    shim.cargarScript(env.context, 'js/libros.js');
+    var storage = env.sandbox.window.storage;
+    var libreria = env.sandbox.window.libreria;
+    var cantidadInicial = libreria.libros.length;
+
+    completarFormulario(env, libroValido({ titulo: 'Libro Persistido', isbn: 'PERSIST-1' }));
+    enviarLibro(env);
+
+    var guardados = storage.loadFromStorage(storage.CLAVE_LIBROS);
+    assert.strictEqual(guardados.length, cantidadInicial + 1, 'el libro se guardó en storage');
+    assert.strictEqual(guardados[guardados.length - 1].titulo, 'Libro Persistido');
+    assert.strictEqual(guardados[guardados.length - 1].isbn, 'PERSIST-1');
 });

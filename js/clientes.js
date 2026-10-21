@@ -197,6 +197,10 @@
             email: normalizarTexto(datos.email)
         });
 
+        if (window.storage && typeof window.storage.saveToStorage === 'function') {
+            window.storage.saveToStorage(window.storage.CLAVE_CLIENTES, li.clientes);
+        }
+
         renderTablaClientes(li);
         poblarSelectorVentaClientes(li);
         limpiarFormulario();
