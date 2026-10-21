@@ -1,0 +1,11 @@
+# Dependencias y tooling de opencode (no es código del proyecto)
+.opencode/node_modules/
+.opencode/package-lock.json
+
+# OneDrive / sistema
+desktop.ini
+Thumbs.db
+*.lnk
+
+# Logs
+*.log

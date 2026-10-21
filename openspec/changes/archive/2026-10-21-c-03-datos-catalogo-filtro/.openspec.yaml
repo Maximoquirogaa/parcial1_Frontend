@@ -1,0 +1,28 @@
+change: c-03-datos-catalogo-filtro
+name: Datos locales, catálogo y filtro
+schema: spec-driven
+status: propose
+governance: MEDIO
+date: 2026-10-21
+language: es
+headings_en: true
+depends_on:
+  - c-01-estructura-html-navegacion
+artifacts:
+  - proposal.md
+  - design.md
+  - tasks.md
+readme_before:
+  - knowledge-base/04_modelo_de_datos.md
+  - knowledge-base/06_funcionalidades.md
+  - knowledge-base/05_reglas_de_negocio.md
+  - knowledge-base/07_flujos_principales.md
+capabilities:
+  new:
+    - datos-catalogo
+modified: []
+files_new:
+  - js/datos.js
+  - js/catalogo.js
+files_modified: []
+desc: Arrays seed con ids estables (editoriales, géneros, autores, libros, clientes), render imperativo del catálogo con textContent y filtro de búsqueda por título (trim + case-insensitive + parcial).
